@@ -1,8 +1,10 @@
-#include <iostream>
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <fstream>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+std::string readFileContent(const std::string& filepath);
 
 int main(int argc, char* argv[])
 {
@@ -32,9 +34,48 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	float vertices[] = {
+		-0.5f, -0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		 0.0f,  0.5f, 0.0f
+	};
+
+	unsigned int vao = 0;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	unsigned int vbo = 0;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	std::string vertexShaderSourceString = readFileContent("shader/shader.vert");
+	char* vertexShaderSource = vertexShaderSourceString.data();
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+	glCompileShader(vertexShader);
+
+	std::string fragmentShaderSourceString = readFileContent("shader/shader.frag");
+	char* fragmentShaderSource = fragmentShaderSourceString.data();
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+	glCompileShader(fragmentShader);
+
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+	glUseProgram(shaderProgram);
+
+	glClearColor(0.4f, 0.3f, 0.8f, 1.0f);
 	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.4f, 0.3f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -47,4 +88,10 @@ int main(int argc, char* argv[])
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+std::string readFileContent(const std::string& filepath) {
+	std::ifstream file(filepath, std::ios::binary);
+	return { std::istreambuf_iterator<char>(file),
+			 std::istreambuf_iterator<char>() };
 }
