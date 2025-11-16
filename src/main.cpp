@@ -4,9 +4,10 @@
 #include <fstream>
 
 #include "Mesh.h"
+#include "Shader.h"
+#include "ShaderProgram.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-std::string readFileContent(const std::string& filepath);
 
 int main(int argc, char* argv[])
 {
@@ -36,6 +37,10 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
+	Shader vertexShader = Shader(ReadShaderFromFile("shader/shader.vert"), GL_VERTEX_SHADER);
+	Shader fragmentShader = Shader(ReadShaderFromFile("shader/shader.frag"), GL_FRAGMENT_SHADER);
+	ShaderProgram shaderProgram = ShaderProgram(vertexShader, fragmentShader);
+
 	float vertices[] = {
 		-0.2f, -0.2f, 0.0f,
 		 0.2f, -0.2f, 0.0f,
@@ -50,7 +55,7 @@ int main(int argc, char* argv[])
 
 	VertexBuffer vertexBuffer = VertexBuffer(vertices, sizeof(vertices) / sizeof(float));
 	IndexBuffer indexBuffer = IndexBuffer(indices, sizeof(indices) / sizeof(unsigned int));
-	Mesh mesh1 = Mesh(&vertexBuffer, &indexBuffer);
+	Mesh mesh1 = Mesh(&vertexBuffer, &indexBuffer, &shaderProgram);
 
 	float vertices2[] = {
 		-0.7f,  0.7f,  0.0f,
@@ -64,25 +69,7 @@ int main(int argc, char* argv[])
 
 	VertexBuffer vertexBuffer2 = VertexBuffer(vertices2, sizeof(vertices2) / sizeof(float));
 	IndexBuffer indexBuffer2 = IndexBuffer(indices2, sizeof(indices2) / sizeof(unsigned int));
-	Mesh mesh2 = Mesh(&vertexBuffer2, &indexBuffer2);
-
-	std::string vertexShaderSourceString = readFileContent("shader/shader.vert");
-	char* vertexShaderSource = vertexShaderSourceString.data();
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-	glCompileShader(vertexShader);
-
-	std::string fragmentShaderSourceString = readFileContent("shader/shader.frag");
-	char* fragmentShaderSource = fragmentShaderSourceString.data();
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-	glCompileShader(fragmentShader);
-
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	glUseProgram(shaderProgram);
+	Mesh mesh2 = Mesh(&vertexBuffer2, &indexBuffer2, &shaderProgram);
 
 	glClearColor(0.4f, 0.3f, 0.8f, 1.0f);
 	while (!glfwWindowShouldClose(window)) {
@@ -102,10 +89,4 @@ int main(int argc, char* argv[])
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-}
-
-std::string readFileContent(const std::string& filepath) {
-	std::ifstream file(filepath, std::ios::binary);
-	return { std::istreambuf_iterator<char>(file),
-			 std::istreambuf_iterator<char>() };
 }
