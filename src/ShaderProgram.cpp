@@ -12,3 +12,8 @@ void ShaderProgram::BindProgram()
 {
 	glUseProgram(this->shaderProgramId);
 }
+
+GLuint ShaderProgram::GetShaderProgramId()
+{
+	return this->shaderProgramId;
+}

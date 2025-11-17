@@ -8,4 +8,5 @@ private:
 public:
 	ShaderProgram(Shader& vertexShader, Shader& fragmentShader);
 	void BindProgram();
+	GLuint GetShaderProgramId();
 };

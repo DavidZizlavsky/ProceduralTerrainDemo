@@ -25,7 +25,8 @@ project "ProceduralTerrainDemo"
     includedirs {
         "include",
         "vendor/glfw-3.4/include",
-        "vendor/glew-2.2.0/include"
+        "vendor/glew-2.2.0/include",
+        "vendor/glm-1.0.2"
     }
 
     libdirs {
