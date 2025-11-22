@@ -12,12 +12,12 @@ IndexBuffer::IndexBuffer(unsigned int* indices, unsigned int indicesCount)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)* this->indicesCount, this->indices, GL_STATIC_DRAW);
 }
 
-void IndexBuffer::BindBuffer()
+void IndexBuffer::BindBuffer() const
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 }
 
-unsigned int IndexBuffer::GetDataCount()
+unsigned int IndexBuffer::GetDataCount() const
 {
 	return this->indicesCount;
 }

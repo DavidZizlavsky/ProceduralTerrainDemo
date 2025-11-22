@@ -8,7 +8,7 @@ private:
 	GLuint ibo = 0;
 public:
 	IndexBuffer(unsigned int* indices, unsigned int indicesCount);
-	void BindBuffer();
-	unsigned int GetDataCount();
+	void BindBuffer() const;
+	unsigned int GetDataCount() const;
 	~IndexBuffer();
 };

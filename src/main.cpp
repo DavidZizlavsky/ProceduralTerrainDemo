@@ -11,6 +11,12 @@
 #include "Mesh.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
+#include "Camera.h"
+
+constexpr int WINDOW_WIDTH = 800;
+constexpr int WINDOW_HEIGHT = 600;
+
+Camera camera;
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
@@ -25,7 +31,7 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Procedural terrain DEMO", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Procedural terrain DEMO", nullptr, nullptr);
 	if (!window) {
 		std::cerr << "GLFW failed to create a window!" << std::endl;
 		glfwTerminate();
@@ -33,6 +39,10 @@ int main(int argc, char* argv[])
 	}
 
 	glfwMakeContextCurrent(window);
+
+	int framebufferWidth, framebufferHeight;
+	glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+	camera = Camera({ framebufferWidth, framebufferHeight });
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	glewExperimental = GL_TRUE;
@@ -91,12 +101,9 @@ int main(int argc, char* argv[])
 	IndexBuffer indexBuffer2 = IndexBuffer(indices2, sizeof(indices2) / sizeof(unsigned int));
 	Mesh mesh2 = Mesh(&vertexBuffer2, &indexBuffer2, &shaderProgram);
 
-	int fbWidth, fbHeight;
-	glClearColor(0.4f, 0.3f, 0.8f, 1.0f);
+	glClearColor(0.35f, 0.55f, 0.75f, 1.0f);
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glfwGetFramebufferSize(window, &fbWidth, &fbHeight); // TODO: move into callback, make fb struct, make fb struct global instance
 		
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(
@@ -104,25 +111,22 @@ int main(int argc, char* argv[])
 			glm::radians(45.0f * (float)glfwGetTime()),
 			glm::vec3(0.0f, 1.0f, 0.0f)
 		);
+		mesh1.SetModelMatrix(model);
 
-		glm::mat4 view = glm::lookAt(
-			glm::vec3(0.0f, 0.0f, 3.0f),  // camera position
-			glm::vec3(0.0f, 0.0f, 0.0f),  // target point
-			glm::vec3(0.0f, 1.0f, 0.0f)   // up vector
+		model = glm::rotate(
+			glm::mat4(1.0f),
+			glm::radians(45.0f * (float)glfwGetTime()),
+			glm::vec3(0.0f, -1.0f, 0.0f)
 		);
+		mesh2.SetModelMatrix(model);
 
-		glm::mat4 projection = glm::perspective(
-			glm::radians(45.0f),
-			(float)fbWidth / fbHeight,
-			0.1f,
-			100.0f
-		);
-
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "model"), 1, GL_FALSE, glm::value_ptr(mesh1.GetModelMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
 
 		mesh1.DrawMesh();
+
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "model"), 1, GL_FALSE, glm::value_ptr(mesh2.GetModelMatrix()));
 		mesh2.DrawMesh();
 
 		glfwSwapBuffers(window);
@@ -136,4 +140,5 @@ int main(int argc, char* argv[])
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	camera.SetViewportSize({ width, height });
 }

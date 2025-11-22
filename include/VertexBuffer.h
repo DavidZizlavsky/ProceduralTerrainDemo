@@ -9,6 +9,6 @@ private:
 	GLuint vbo = 0;
 public:
 	VertexBuffer(float* vertices, unsigned int verticesCount);
-	void BindBuffer();
+	void BindBuffer() const;
 	~VertexBuffer();
 };

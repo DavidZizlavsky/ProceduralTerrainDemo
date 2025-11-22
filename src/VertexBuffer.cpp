@@ -15,7 +15,7 @@ VertexBuffer::VertexBuffer(float* vertices, unsigned int verticesCount)
 	glEnableVertexAttribArray(0);
 }
 
-void VertexBuffer::BindBuffer()
+void VertexBuffer::BindBuffer() const
 {
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
