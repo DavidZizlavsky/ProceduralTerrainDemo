@@ -23,6 +23,27 @@ void Camera::SetViewportSize(Size newViewportSize)
 	RecalculateMatrices();
 }
 
+bool Camera::SetUniforms(ShaderProgram shaderProgram)
+{
+	GLint uniformLocation;
+	
+	uniformLocation = glGetUniformLocation(shaderProgram.GetShaderProgramId(), "view");
+	if (uniformLocation == -1) {
+		std::cerr << "Locating 'View' matrix uniform failed!" << std::endl;
+		return false;
+	}
+	glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(GetViewMatrix()));
+
+	uniformLocation = glGetUniformLocation(shaderProgram.GetShaderProgramId(), "projection");
+	if (uniformLocation == -1) {
+		std::cerr << "Locating 'Projection' matrix uniform failed!" << std::endl;
+		return false;
+	}
+	glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(GetProjectionMatrix()));
+
+	return true;
+}
+
 void Camera::RecalculateMatrices()
 {
 	if (viewportSize.x == 0 || viewportSize.y == 0) {

@@ -120,13 +120,9 @@ int main(int argc, char* argv[])
 		);
 		mesh2.SetModelMatrix(model);
 
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "model"), 1, GL_FALSE, glm::value_ptr(mesh1.GetModelMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "projection"), 1, GL_FALSE, glm::value_ptr(camera.GetProjectionMatrix()));
+		camera.SetUniforms(shaderProgram);
 
 		mesh1.DrawMesh();
-
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.GetShaderProgramId(), "model"), 1, GL_FALSE, glm::value_ptr(mesh2.GetModelMatrix()));
 		mesh2.DrawMesh();
 
 		glfwSwapBuffers(window);
